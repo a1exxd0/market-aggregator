@@ -44,7 +44,12 @@ cargo test
 ## Testing
 - [ ] Provide a plan outlining approach to ensure system reliability
 - [ ] Include basic test cases demonstrating core functionality
-- [ ] Include examples of different types of tests (unit, integration, functional, end-to-end, performance)
+- [ ] Include examples of different types of tests
+  - [X] Unit -> src/time_series_array/mod.rs
+  - [ ] Integration
+  - [ ] Functional
+  - [ ] End-to-end
+  - [ ] Performance
 - [X] Include test coverage reporting
   - Run `cargo llvm-cov`
 ## Environment
