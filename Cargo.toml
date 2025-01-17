@@ -5,7 +5,6 @@ edition = "2024"
 authors = ["Alex Do <alexxdo2004@gmail.com>"]
 readme = "README.md"
 license = "MIT"
-edition = "2021"
 exclude = [".github"]
 
 [features]
