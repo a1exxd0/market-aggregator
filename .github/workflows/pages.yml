@@ -19,7 +19,7 @@ jobs:
     - name: Build docs
       run: cargo doc -p market-aggregator --no-deps
     - name: Add redirect
-      run: echo '<meta http-equiv="refresh" content="0;url=acc/index.html">' > target/doc/index.html
+      run: echo '<meta http-equiv="refresh" content="0;url=market-aggregator/index.html">' > target/doc/index.html
     - name: Remove lock file
       run: rm target/doc/.lock
     - name: Upload artifact
