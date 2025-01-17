@@ -12,6 +12,11 @@ Then, for code coverage tooling:
 cargo install cargo-llvm-cov
 ```
 
+To set up API keys, you should create a dotenv file `.env` inside `market-aggregator`, and fill in your keys as follows:
+```sh
+DERIBIT_API_KEY=xxxxxx
+BINANCE_API_KEY=xxxxxx
+```
 # Build and run
 Simple as:
 ```rust
@@ -44,7 +49,7 @@ cargo test
 ## Testing
 - [ ] Provide a plan outlining approach to ensure system reliability
 - [ ] Include basic test cases demonstrating core functionality
-- [ ] Include examples of different types of tests
+- Include examples of different types of tests
   - [X] Unit -> src/time_series_array/mod.rs
   - [ ] Integration
   - [ ] Functional
@@ -53,7 +58,7 @@ cargo test
 - [X] Include test coverage reporting
   - Run `cargo llvm-cov`
 ## Environment
-- [ ] Ensure the development environment is compatible across architectures
+- [X] Ensure the development environment is compatible across architectures
 - [ ] Design the system to be scalable for handling varying levels of market activity
 - [X] Implement basic CI/CD workflow
 - [X] Configure build automation
