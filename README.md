@@ -5,7 +5,7 @@ Completed as part of a take-home assessment.
 
 
 # setup
-Firstly, you'll need the [`Rust` toolchain](https://doc.rust-lang.org/cargo/getting-started/installation.html) installed. 
+Firstly, you'll need the [Rust toolchain](https://doc.rust-lang.org/cargo/getting-started/installation.html) installed. 
 
 Thats it :) 
 
