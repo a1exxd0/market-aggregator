@@ -12,8 +12,9 @@ Then, for code coverage tooling:
 cargo install cargo-llvm-cov
 ```
 
-To set up API keys, you should create a dotenv file `.env` inside `market-aggregator`, and fill in your keys as follows:
+To set up APIs, you should create a dotenv file `.env` inside `market-aggregator`, and fill in your details as follows:
 ```sh
+DERIBIT_CLIENT_ID=xxxxxx
 DERIBIT_API_KEY=xxxxxx
 BINANCE_API_KEY=xxxxxx
 ```
@@ -31,10 +32,10 @@ cargo test
 ## WebSocket Integration
 - [ ] Implement proper connection management with auto-reconnection and error handling
 - [ ] Implement basic monitoring capabilities for connection status
-- [ ] Handle Deribit WebSocket
+- [X] Handle Deribit WebSocket
 - [ ] Handle Binance WebSocket
 - [ ] Process real-time updates while maintaining an accurate order-book state
-- [ ] Let it easily accomodate more exchanges later on
+- [X] Let it easily accomodate more exchanges later on
 - [ ] Support for additional trading pairs beyond BTC-USDT
 ## Storage Solution
 - [X] Temporary storage optimised for time-series and tick-level data
@@ -62,4 +63,4 @@ cargo test
 - [ ] Design the system to be scalable for handling varying levels of market activity
 - [X] Implement basic CI/CD workflow
 - [X] Configure build automation
-- [ ] Include proper logging and monitoring
+- [X] Include proper logging and monitoring
