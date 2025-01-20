@@ -91,17 +91,13 @@ impl Binance {
         }
     }
 
-    async fn ws_pong(&self, id: &str) -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
+    async fn ws_pong(&self, id: &str) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let msg = json!({
             "id": id,
             "method": "pong",
         });
 
-        self.sink
-            .lock()
-            .await
-            .send(msg.to_string().into())
-            .await?;
+        self.sink.lock().await.send(msg.to_string().into()).await?;
 
         Ok(())
     }
@@ -137,7 +133,7 @@ impl Binance {
             match self.ws_pong(id).await {
                 Err(err) => {
                     log::error!("Error sending pong: {}", err);
-                },
+                }
                 Ok(_) => {
                     log::info!("Successfully responded pong to Binance ping.");
                 }
