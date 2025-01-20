@@ -8,6 +8,8 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  DERIBIT_API_KEY: ${{ secrets.DERIBIT_API_KEY }}
+  DERIBIT_CLIENT_ID: ${{ secrets.DERIBIT_CLIENT_ID }}
 
 jobs:
   build:
