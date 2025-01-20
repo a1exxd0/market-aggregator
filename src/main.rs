@@ -1,21 +1,31 @@
+use book_management::traded_instruments::Instrument;
 use market_aggregator::{
     book_management,
-    exchange_connectivity::{ConnectedExchange, ExchangeKeys, deribit::Deribit},
+    exchange_connectivity::{ConnectedExchangeForBook, ExchangeKeys, deribit::Deribit},
 };
 use std::{
     sync::{Arc, atomic::Ordering},
     time::Duration,
 };
-use tokio::sync::Mutex;
+
+use colored::Colorize;
 
 #[tokio::main]
 async fn main() {
     fern::Dispatch::new()
-        .format(|out, message, record| {
+        .format(move |out, message, record| {
+            let level_colored = match record.level() {
+                log::Level::Error => record.level().to_string().red(),
+                log::Level::Warn => record.level().to_string().yellow(),
+                log::Level::Info => record.level().to_string().green(),
+                log::Level::Debug => record.level().to_string().blue(),
+                log::Level::Trace => record.level().to_string().magenta(),
+            };
+
             out.finish(format_args!(
                 "{} [{}] {}",
                 chrono::Local::now().format("%Y-%m-%d %H:%M:%S"),
-                record.level(),
+                level_colored,
                 message
             ))
         })
@@ -37,7 +47,21 @@ async fn main() {
     });
 
     let bids_asks = Arc::clone(&deribit)
-        .pull_bids_asks(10, book_management::traded_instruments::Instrument::BtcUsdt)
+        .pull_bids_asks(10, Instrument::BtcUsdt)
+        .await;
+
+    match bids_asks {
+        Ok(val) => {
+            println!("{:?}", val.0);
+            println!("{:?}", val.1);
+        }
+        Err(err) => {
+            log::error!("{}", err);
+        }
+    }
+
+    let bids_asks = Arc::clone(&deribit)
+        .pull_bids_asks(10, Instrument::EthUsdc)
         .await;
 
     match bids_asks {
