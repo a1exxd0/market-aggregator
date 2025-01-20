@@ -1,3 +1,5 @@
+pub mod book;
+
 use std::sync::{
     Arc,
     atomic::{AtomicBool, AtomicU64, Ordering},
@@ -20,7 +22,7 @@ use super::ConnectedExchangeForBook;
 type Sink = SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>;
 type Stream = SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>;
 
-const BINANCE_WS_URL: &str = "wss://data-stream.binance.vision/ws/v3";
+const BINANCE_WS_URL: &str = "wss://ws-api.binance.com:443/ws-api/v3";
 const BINANCE_WS_TEST_URL: &str = "wss://testnet.binance.vision/ws-api/v3";
 
 /// Connect then ws manager
@@ -91,17 +93,13 @@ impl Binance {
         }
     }
 
-    async fn ws_pong(&self, id: &str) -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
+    async fn ws_pong(&self, id: &str) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let msg = json!({
             "id": id,
             "method": "pong",
         });
 
-        self.sink
-            .lock()
-            .await
-            .send(msg.to_string().into())
-            .await?;
+        self.sink.lock().await.send(msg.to_string().into()).await?;
 
         Ok(())
     }
@@ -137,7 +135,7 @@ impl Binance {
             match self.ws_pong(id).await {
                 Err(err) => {
                     log::error!("Error sending pong: {}", err);
-                },
+                }
                 Ok(_) => {
                     log::info!("Successfully responded pong to Binance ping.");
                 }
@@ -150,12 +148,12 @@ impl Binance {
                 .await
                 .insert(id, text.to_string());
             log::info!(
-                "Unprocessed message with valid ID from Deribit stored with id: {}",
+                "Unprocessed message with valid ID from Binance stored with id: {}",
                 id
             );
         } else {
             log::info!(
-                "Unprocessed message with no valid ID component from Deribit: {}",
+                "Unprocessed message with no valid ID component from Binance: {}",
                 text
             );
         }
@@ -173,14 +171,21 @@ impl Binance {
 
         Ok(())
     }
+
+    fn get_new_id(&self) -> u64 {
+        if self.curr_msg_id.load(Ordering::Relaxed) > 1000000 {
+            self.curr_msg_id.store(10000, Ordering::Relaxed);
+        } else {
+            self.curr_msg_id.fetch_add(1, Ordering::Relaxed);
+        }
+
+        self.curr_msg_id.load(Ordering::Relaxed)
+    }
 }
-
-// impl ConnectedExchangeForBook for Binance {
-
-// }
 
 #[cfg(test)]
 mod test {
+    use crate::exchange_connectivity::{ConnectedExchangeForBook, Instrument};
     use std::sync::Arc;
     use std::sync::atomic::AtomicBool;
 
@@ -189,28 +194,6 @@ mod test {
     use super::Binance;
 
     async fn setup() -> (Binance, Arc<AtomicBool>) {
-        // fern::Dispatch::new()
-        //     .format(move |out, message, record| {
-        //         let level_colored = match record.level() {
-        //             log::Level::Error => record.level().to_string().red(),
-        //             log::Level::Warn => record.level().to_string().yellow(),
-        //             log::Level::Info => record.level().to_string().green(),
-        //             log::Level::Debug => record.level().to_string().blue(),
-        //             log::Level::Trace => record.level().to_string().magenta(),
-        //         };
-
-        //         out.finish(format_args!(
-        //             "{} [{}] {}",
-        //             chrono::Local::now().format("%Y-%m-%d %H:%M:%S"),
-        //             level_colored,
-        //             message
-        //         ))
-        //     })
-        //     .level(log::LevelFilter::Debug)
-        //     .chain(std::io::stdout())
-        //     .apply()
-        //     .unwrap();
-
         match Binance::connect().await {
             None => panic!("Expected successful connection."),
             Some(x) => x,
@@ -238,5 +221,34 @@ mod test {
         if let Err(err) = binance.ws_request_time().await {
             log::error!("Error sending Binance time request: {}", err);
         }
+    }
+
+    #[tokio::test]
+    async fn retrieve_books() {
+        let (binance, _) = setup().await;
+        let binance = Arc::new(binance);
+
+        let binance_clone = Arc::clone(&binance);
+        tokio::spawn(async move {
+            binance_clone.ws_manager().await;
+        });
+
+        let result_btc_usdt = match binance.pull_bids_asks(10, Instrument::BtcUsdt).await {
+            Ok(vec) => vec,
+            Err(err) => {
+                panic!("Error getting message: {}", err);
+            }
+        };
+        let result_eth_usdc = match binance.pull_bids_asks(10, Instrument::EthUsdc).await {
+            Ok(vec) => vec,
+            Err(err) => {
+                panic!("Error getting message: {}", err);
+            }
+        };
+
+        assert!(result_btc_usdt.0.len() <= 10);
+        assert!(result_btc_usdt.1.len() <= 10);
+        assert!(result_eth_usdc.0.len() <= 10);
+        assert!(result_eth_usdc.1.len() <= 10);
     }
 }

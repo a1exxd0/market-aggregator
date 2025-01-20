@@ -1,7 +1,7 @@
 use book_management::traded_instruments::Instrument;
 use market_aggregator::{
     book_management,
-    exchange_connectivity::{ConnectedExchangeForBook, ExchangeKeys, deribit::Deribit},
+    exchange_connectivity::{binance::Binance, deribit::Deribit, ConnectedExchangeForBook, ExchangeKeys},
 };
 use std::{
     sync::{Arc, atomic::Ordering},
@@ -62,6 +62,34 @@ async fn main() {
 
     let bids_asks = Arc::clone(&deribit)
         .pull_bids_asks(10, Instrument::EthUsdc)
+        .await;
+
+    match bids_asks {
+        Ok(val) => {
+            println!("{:?}", val.0);
+            println!("{:?}", val.1);
+        }
+        Err(err) => {
+            log::error!("{}", err);
+        }
+    }
+
+    // tokio::time::sleep(Duration::from_secs(5)).await;
+
+    keep_alive.store(false, Ordering::Relaxed);
+
+
+
+    let (binance, _) = Binance::connect().await.unwrap();
+    let binance = Arc::new(binance);
+
+    let binance_clone = Arc::clone(&binance);
+    tokio::spawn(async move {
+        binance_clone.ws_manager().await;
+    });
+
+    let bids_asks = Arc::clone(&binance)
+        .pull_bids_asks(10, Instrument::BtcUsdt)
         .await;
 
     match bids_asks {

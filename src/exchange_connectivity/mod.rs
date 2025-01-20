@@ -16,11 +16,11 @@ pub trait ConnectedExchangeForBook {
     /// Returns a vector of bids and asks in the book alongside
     /// the time at which a response was recieved in time
     /// after the UNIX epoch (Deribit standard).
-    async fn pull_bids_asks(
+    fn pull_bids_asks(
         &self,
         depth: u32,
         instrument: Instrument,
-    ) -> Result<(Vec<Bid>, Vec<Ask>, Duration), Box<dyn Error + Send + Sync>>;
+    ) -> impl std::future::Future<Output = Result<(Vec<Bid>, Vec<Ask>, Duration), Box<dyn Error + Send + Sync>>> + Send;
 
     fn to_instrument_name(instrument: Instrument) -> String;
 }
@@ -28,6 +28,7 @@ pub trait ConnectedExchangeForBook {
 #[derive(Clone, Copy, Debug)]
 pub enum ExchangeType {
     Deribit,
+    Binance,
 }
 
 pub struct ExchangeKeys {

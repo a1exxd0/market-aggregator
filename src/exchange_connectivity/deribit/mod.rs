@@ -267,7 +267,7 @@ impl Deribit {
             if let Some(expiry_time) = *refresh_token_expiry_time.lock().await
                 && let Some(refresh_token) = &*refresh_token.lock().await
             {
-                log::info!("Auth token for Deribit close to expiry. Refreshing.");
+                log::info!("Auth token for Deribit ConnectedExchangeclose to expiry. Refreshing.");
                 if let Ok(curr_time) = SystemTime::now().duration_since(UNIX_EPOCH) {
                     if curr_time > expiry_time {
                         let msg = json!({
@@ -323,7 +323,10 @@ impl Deribit {
 mod test {
     use std::sync::{Arc, atomic::AtomicBool};
 
-    use crate::exchange_connectivity::ExchangeKeys;
+    use crate::{
+        book_management::traded_instruments::Instrument,
+        exchange_connectivity::{ConnectedExchangeForBook, ExchangeKeys},
+    };
 
     use super::Deribit;
 
@@ -357,5 +360,34 @@ mod test {
             println!("{}", err.to_string());
             panic!("unexpected error!");
         }
+    }
+
+    #[tokio::test]
+    async fn retrieve_books() {
+        let (deribit, _) = create_exchange().await;
+        let deribit = Arc::new(deribit);
+
+        let deribit_clone = Arc::clone(&deribit);
+        tokio::spawn(async move {
+            deribit_clone.ws_manager().await;
+        });
+
+        let result_btc_usdt = match deribit.pull_bids_asks(10, Instrument::BtcUsdt).await {
+            Ok(vec) => vec,
+            Err(err) => {
+                panic!("Error getting message: {}", err);
+            }
+        };
+        let result_eth_usdc = match deribit.pull_bids_asks(10, Instrument::EthUsdc).await {
+            Ok(vec) => vec,
+            Err(err) => {
+                panic!("Error getting message: {}", err);
+            }
+        };
+
+        assert!(result_btc_usdt.0.len() <= 10);
+        assert!(result_btc_usdt.1.len() <= 10);
+        assert!(result_eth_usdc.0.len() <= 10);
+        assert!(result_eth_usdc.1.len() <= 10);
     }
 }

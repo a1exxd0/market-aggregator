@@ -33,7 +33,7 @@ cargo test
 - [ ] Implement proper connection management with auto-reconnection and error handling
 - [ ] Implement basic monitoring capabilities for connection status
 - [X] Handle Deribit WebSocket
-- [ ] Handle Binance WebSocket
+- [X] Handle Binance WebSocket
 - [ ] Process real-time updates while maintaining an accurate order-book state
 - [X] Let it easily accomodate more exchanges later on
 - [X] Support for additional trading pairs beyond BTC-USDT
@@ -44,7 +44,7 @@ cargo test
   - This is something I can integrate behind an interface wrapper for the above. The time complexity of these kind of partition-indexing operations are O(log(n)), and even though this isn't the be-all-end-all, sources from the stack-exchange mentioned above indicate that the cache-friendliness of a binary search against something like a B-tree/LSM-tree *might* be better for something in-memory. For something you'd want to push fast, it's also easy to implement!
 ## Aggregation logic
 - [ ] Combine order book data from exchanges into consolidated, unified view
-- [ ] Implement proper error handling for malformed or unexpected data
+- [X] Implement proper error handling for malformed or unexpected data
 - [ ] Develop an aggregation framework that supports more custom analytics or augmentation
 - [ ] Add an additional statistic or sophisticated analytics feature like volume/imbalance between bid/ask
 ## Testing
