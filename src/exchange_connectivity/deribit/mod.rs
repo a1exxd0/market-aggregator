@@ -1,8 +1,8 @@
 pub mod book;
 
-use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
+use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering;
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -29,6 +29,7 @@ pub struct Deribit {
     refresh_token: Arc<Mutex<Option<String>>>,
     refresh_token_expiry_time: Arc<Mutex<Option<Duration>>>,
     keep_alive: Arc<AtomicBool>,
+    curr_msg_id: AtomicU64,
 }
 
 const DERIBIT_WS_URL: &str = "wss://www.deribit.com/ws/api/v2";
@@ -66,6 +67,7 @@ impl Deribit {
                         refresh_token: Arc::new(Mutex::new(None)),
                         refresh_token_expiry_time: Arc::new(Mutex::new(None)),
                         keep_alive: keep_alive.clone(),
+                        curr_msg_id: AtomicU64::new(10000),
                     },
                     keep_alive.clone(),
                 ))
@@ -304,6 +306,16 @@ impl Deribit {
 
             tokio::time::sleep(Duration::from_secs(150)).await;
         }
+    }
+
+    fn get_new_id(&self) -> u64 {
+        if self.curr_msg_id.load(Ordering::Relaxed) > 1000000 {
+            self.curr_msg_id.store(10000, Ordering::Relaxed);
+        } else {
+            self.curr_msg_id.fetch_add(1, Ordering::Relaxed);
+        }
+
+        self.curr_msg_id.load(Ordering::Relaxed)
     }
 }
 
