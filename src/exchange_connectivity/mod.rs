@@ -1,15 +1,15 @@
+pub mod binance;
 pub mod deribit;
 
 use std::env;
 use std::time::Duration;
 
-use deribit::Deribit;
 use dotenv::dotenv;
 use std::error::Error;
 
 use crate::book_management::{Ask, Bid, traded_instruments::Instrument};
 
-pub trait ConnectedExchange {
+pub trait ConnectedExchangeForBook {
     /// For a given request, pull (up to) `depth` bids and asks for
     /// some specific instrument.
     ///
@@ -21,6 +21,8 @@ pub trait ConnectedExchange {
         depth: u32,
         instrument: Instrument,
     ) -> Result<(Vec<Bid>, Vec<Ask>, Duration), Box<dyn Error + Send + Sync>>;
+
+    fn to_instrument_name(instrument: Instrument) -> String;
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -43,10 +45,6 @@ impl ExchangeKeys {
 
         let deribit_api_key = env::var("DERIBIT_API_KEY").expect(
             "You must create a .env file with your Deribit API key. Read the README.md for more info.",
-        );
-
-        let binance_api_key = env::var("BINANCE_API_KEY").expect(
-            "You must create a .env file with your Binance API key. Read the README.md for more info.",
         );
 
         ExchangeKeys {

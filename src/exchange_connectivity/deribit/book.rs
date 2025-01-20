@@ -1,26 +1,14 @@
 //! Order book related bits
 use crate::book_management::{Ask, Bid, Order};
-use crate::exchange_connectivity::{ConnectedExchange, ExchangeType, Instrument};
+use crate::exchange_connectivity::{ConnectedExchangeForBook, ExchangeType, Instrument};
 
 use super::Deribit;
 use serde_json::{Value, json};
 
-use core::time;
 use std::error::Error;
-use std::sync::Arc;
-use std::sync::Weak;
-use std::sync::atomic::AtomicBool;
-use std::sync::atomic::Ordering;
-use std::time::{SystemTime, UNIX_EPOCH};
 
-use futures_util::{SinkExt, StreamExt, stream::SplitSink, stream::SplitStream};
-use log::info;
+use futures_util::SinkExt;
 use std::time::Duration;
-use tokio::net::TcpStream;
-use tokio::sync::Mutex;
-use tokio_tungstenite::{
-    MaybeTlsStream, WebSocketStream, connect_async, tungstenite::protocol::Message,
-};
 
 #[derive(Clone, Copy)]
 pub enum ValidOrderDepth {
@@ -83,8 +71,7 @@ impl Deribit {
                     .filter(|order_pair| order_pair.len() == 2)
                     .and_then(|order_pair| {
                         let price = order_pair[0].as_f64()?;
-                        let qty_flt = order_pair[1].as_f64()?;
-                        let qty = convert_f64_to_usize(qty_flt)?;
+                        let qty = order_pair[1].as_f64()?;
                         Some(T::new(instrument, exchange, qty, price))
                     })
             })
@@ -92,20 +79,21 @@ impl Deribit {
     }
 }
 
-impl ConnectedExchange for Deribit {
+impl ConnectedExchangeForBook for Deribit {
     async fn pull_bids_asks(
         &self,
         depth: u32,
         instrument: Instrument,
     ) -> Result<(Vec<Bid>, Vec<Ask>, Duration), Box<dyn Error + Send + Sync>> {
         let depth = ValidOrderDepth::from_number(depth);
+        let req_id = self.get_new_id();
 
-        self.request_get_order_book(1000, &instrument.to_string(), depth)
+        self.request_get_order_book(req_id, &Deribit::to_instrument_name(instrument), depth)
             .await?;
 
         for _ in 0..5 {
             let mut multimap = self.non_main_stream.lock().await;
-            let multimap_entry = multimap.get(&1000);
+            let multimap_entry = multimap.get(&req_id);
             if let Some(entry) = multimap_entry {
                 log::info!("Found msg with id 1000: {}", entry);
                 let msg: serde_json::Value = serde_json::from_str(&entry)
@@ -126,7 +114,7 @@ impl ConnectedExchange for Deribit {
                             &asks,
                             instrument,
                         )?;
-                        multimap.remove(&1000);
+                        multimap.remove(&req_id);
                         return Ok((bid_vec, ask_vec, Duration::from_millis(timestamp)));
                     }
                 }
@@ -134,16 +122,17 @@ impl ConnectedExchange for Deribit {
             tokio::time::sleep(Duration::from_millis(100)).await;
         }
 
-        Err("Did not recieve response for order book from Deribit. "
-            .to_string()
-            .into())
+        Err(
+            "Did not recieve response for order book from Deribit after multiple attempts. "
+                .to_string()
+                .into(),
+        )
     }
-}
 
-fn convert_f64_to_usize(value: f64) -> Option<usize> {
-    if value < 0.0 || value > (usize::MAX as f64) {
-        None
-    } else {
-        Some(value as usize)
+    fn to_instrument_name(instrument: Instrument) -> String {
+        match instrument {
+            Instrument::BtcUsdt => "BTC_USDT".to_string(),
+            Instrument::EthUsdc => "ETH_USDC".to_string(),
+        }
     }
 }
