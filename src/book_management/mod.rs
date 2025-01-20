@@ -28,7 +28,7 @@ impl AggregatedOrderBook {
             asks: Arc::new(Mutex::new(BTreeSet::new())),
         }
     }
-    
+
     pub async fn update_state(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         let mut bids = self.bids.lock().await;
         let mut asks = self.asks.lock().await;
@@ -40,8 +40,8 @@ impl AggregatedOrderBook {
                 Exchange::Binance(binance) => {
                     let binance = Arc::clone(binance);
 
-                    let (new_bids, new_asks, _) = binance
-                        .pull_bids_asks(10, self.instrument).await?;
+                    let (new_bids, new_asks, _) =
+                        binance.pull_bids_asks(10, self.instrument).await?;
 
                     for bid in new_bids {
                         bids.insert(bid);
@@ -50,12 +50,12 @@ impl AggregatedOrderBook {
                     for ask in new_asks {
                         asks.insert(ask);
                     }
-                },
+                }
                 Exchange::Deribit(deribit) => {
                     let deribit = Arc::clone(deribit);
 
-                    let (new_bids, new_asks, _) = deribit
-                        .pull_bids_asks(10, self.instrument).await?;
+                    let (new_bids, new_asks, _) =
+                        deribit.pull_bids_asks(10, self.instrument).await?;
 
                     for bid in new_bids {
                         bids.insert(bid);
@@ -66,7 +66,6 @@ impl AggregatedOrderBook {
                     }
                 }
             }
-            
         }
 
         Ok(())
@@ -86,8 +85,12 @@ impl AggregatedOrderBook {
         let mut asks_iter = asks.iter();
 
         for _ in 0..max_rows {
-            let bid = bids_iter.next().map_or("".to_string(), |b| format!("{:?}", b));
-            let ask = asks_iter.next().map_or("".to_string(), |a| format!("{:?}", a));
+            let bid = bids_iter
+                .next()
+                .map_or("".to_string(), |b| format!("{:?}", b));
+            let ask = asks_iter
+                .next()
+                .map_or("".to_string(), |a| format!("{:?}", a));
             println!("{:<20} {:<20}", bid, ask);
         }
 
@@ -288,28 +291,29 @@ impl Order for Ask {
 mod test {
     use std::sync::Arc;
 
-    use crate::book_management::traded_instruments::Instrument;
     use crate::book_management::AggregatedOrderBook;
+    use crate::book_management::traded_instruments::Instrument;
     use crate::exchange_connectivity::Exchange;
-    use crate::exchange_connectivity::{binance::Binance, deribit::Deribit, ExchangeKeys};
+    use crate::exchange_connectivity::{ExchangeKeys, binance::Binance, deribit::Deribit};
 
     #[tokio::test]
     async fn get_book() {
         dotenv::dotenv().ok();
         let keys = ExchangeKeys::get_environment();
-        let (binance, _) = Binance::connect().await.expect("Binance failed to connect.");
-        let (deribit, _) = Deribit::connect(keys.deribit_client_id, keys.deribit_api_key).await.expect("Deribit failed to connect.");
+        let (binance, _) = Binance::connect()
+            .await
+            .expect("Binance failed to connect.");
+        let (deribit, _) = Deribit::connect(keys.deribit_client_id, keys.deribit_api_key)
+            .await
+            .expect("Deribit failed to connect.");
 
         let binance = Arc::new(binance);
         let deribit = Arc::new(deribit);
-        
-        let book = AggregatedOrderBook::new(
-            Instrument::BtcUsdt,
-            &vec![
-                Exchange::Binance(Arc::clone(&binance)), 
-                Exchange::Deribit(Arc::clone(&deribit)),
-            ],
-        );
+
+        let book = AggregatedOrderBook::new(Instrument::BtcUsdt, &vec![
+            Exchange::Binance(Arc::clone(&binance)),
+            Exchange::Deribit(Arc::clone(&deribit)),
+        ]);
 
         if let Err(err) = book.pretty_print().await {
             panic!("Unexpected error when printing: {}", err);
