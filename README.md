@@ -16,8 +16,8 @@ To set up APIs, you should create a dotenv file `.env` inside `market-aggregator
 ```sh
 DERIBIT_CLIENT_ID=xxxxxx
 DERIBIT_API_KEY=xxxxxx
-BINANCE_API_KEY=xxxxxx
 ```
+Binance key is not required as we use a public API.
 # Build and run
 Simple as:
 ```rust
@@ -36,7 +36,7 @@ cargo test
 - [ ] Handle Binance WebSocket
 - [ ] Process real-time updates while maintaining an accurate order-book state
 - [X] Let it easily accomodate more exchanges later on
-- [ ] Support for additional trading pairs beyond BTC-USDT
+- [X] Support for additional trading pairs beyond BTC-USDT
 ## Storage Solution
 - [X] Temporary storage optimised for time-series and tick-level data
   - Sometimes, [simplicity](https://quant.stackexchange.com/questions/613/what-is-the-best-data-structure-implementation-for-representing-a-time-series) is the key to producing a product best-suited to purpose! I'll be using arrays.
