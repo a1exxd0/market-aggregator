@@ -1,7 +1,9 @@
 use book_management::traded_instruments::Instrument;
 use market_aggregator::{
     book_management,
-    exchange_connectivity::{binance::Binance, deribit::Deribit, ConnectedExchangeForBook, ExchangeKeys},
+    exchange_connectivity::{
+        ConnectedExchangeForBook, ExchangeKeys, binance::Binance, deribit::Deribit,
+    },
 };
 use std::{
     sync::{Arc, atomic::Ordering},
@@ -77,8 +79,6 @@ async fn main() {
     // tokio::time::sleep(Duration::from_secs(5)).await;
 
     keep_alive.store(false, Ordering::Relaxed);
-
-
 
     let (binance, _) = Binance::connect().await.unwrap();
     let binance = Arc::new(binance);

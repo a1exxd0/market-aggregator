@@ -20,6 +20,7 @@ use tokio_tungstenite::{
 type Sink = SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>;
 type Stream = SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>;
 
+#[derive(Debug)]
 pub struct Deribit {
     client_id: String,
     client_secret: String,

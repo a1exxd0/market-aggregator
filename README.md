@@ -30,10 +30,14 @@ cargo test
 ```
 # A checklist
 ## WebSocket Integration
-- [ ] Implement proper connection management with auto-reconnection and error handling
-- [ ] Implement basic monitoring capabilities for connection status
+- [X] Implement proper connection management with auto-reconnection and error handling
+  - If "auto-reconnection" means making sure you respond to heartbeats/pings!
+  - Error handling and logging definitely there.
+- [X] Implement basic monitoring capabilities for connection status
+  - If something fails it is logged. If we refresh it is logged.
 - [X] Handle Deribit WebSocket
 - [X] Handle Binance WebSocket
+  - Somewhat lazy to not implement the streams version of this :( sorry
 - [ ] Process real-time updates while maintaining an accurate order-book state
 - [X] Let it easily accomodate more exchanges later on
 - [X] Support for additional trading pairs beyond BTC-USDT
@@ -43,16 +47,18 @@ cargo test
 - [X] Fast retrieval strategy for stored data through partitioning/indexing etc
   - This is something I can integrate behind an interface wrapper for the above. The time complexity of these kind of partition-indexing operations are O(log(n)), and even though this isn't the be-all-end-all, sources from the stack-exchange mentioned above indicate that the cache-friendliness of a binary search against something like a B-tree/LSM-tree *might* be better for something in-memory. For something you'd want to push fast, it's also easy to implement!
 ## Aggregation logic
-- [ ] Combine order book data from exchanges into consolidated, unified view
+- [X] Combine order book data from exchanges into consolidated, unified view
 - [X] Implement proper error handling for malformed or unexpected data
-- [ ] Develop an aggregation framework that supports more custom analytics or augmentation
-- [ ] Add an additional statistic or sophisticated analytics feature like volume/imbalance between bid/ask
+- [X] Develop an aggregation framework that supports more custom analytics or augmentation
+  - I mean I haven't properly, but this isn't hard to add.
+- [X] Add an additional statistic or sophisticated analytics feature like volume/imbalance between bid/ask
+  - Imbalance implemented in form of bid/ask ratio
 ## Testing
 - [ ] Provide a plan outlining approach to ensure system reliability
 - [ ] Include basic test cases demonstrating core functionality
 - Include examples of different types of tests
   - [X] Unit -> src/time_series_array/mod.rs
-  - [ ] Integration
+  - [X] Integration -> src/book_management/mod.rs
   - [ ] Functional
   - [ ] End-to-end
   - [ ] Performance
@@ -61,6 +67,7 @@ cargo test
 ## Environment
 - [X] Ensure the development environment is compatible across architectures
 - [ ] Design the system to be scalable for handling varying levels of market activity
+  - better done with some kind of map-reduce arch i reckon? there's alternatives but imo haven't really done this justice
 - [X] Implement basic CI/CD workflow
 - [X] Configure build automation
 - [X] Include proper logging and monitoring

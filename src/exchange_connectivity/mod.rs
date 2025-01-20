@@ -1,9 +1,11 @@
 pub mod binance;
 pub mod deribit;
 
-use std::env;
+use std::{env, sync::Arc};
 use std::time::Duration;
 
+use binance::Binance;
+use deribit::Deribit;
 use dotenv::dotenv;
 use std::error::Error;
 
@@ -20,15 +22,41 @@ pub trait ConnectedExchangeForBook {
         &self,
         depth: u32,
         instrument: Instrument,
-    ) -> impl std::future::Future<Output = Result<(Vec<Bid>, Vec<Ask>, Duration), Box<dyn Error + Send + Sync>>> + Send;
+    ) -> impl std::future::Future<
+        Output = Result<(Vec<Bid>, Vec<Ask>, Duration), Box<dyn Error + Send + Sync>>,
+    > + Send;
 
-    fn to_instrument_name(instrument: Instrument) -> String;
+    fn to_instrument_name(instrument: Instrument) -> String where Self: Sized;
 }
 
 #[derive(Clone, Copy, Debug)]
 pub enum ExchangeType {
     Deribit,
     Binance,
+}
+
+#[derive(Debug, Clone)]
+pub enum Exchange {
+    Deribit(Arc<Deribit>),
+    Binance(Arc<Binance>),
+}
+
+impl Exchange {
+    pub async fn pull_bids_asks(
+        &self,
+        depth: u32,
+        instrument: Instrument,
+    ) -> Result<(Vec<Bid>, Vec<Ask>, Duration), Box<dyn Error + Send + Sync>>
+    {
+        match self {
+            Exchange::Deribit(deribit) => {
+                deribit.pull_bids_asks(depth, instrument).await
+            },
+            Exchange::Binance(binance) => {
+                binance.pull_bids_asks(depth, instrument).await
+            },
+        }
+    }
 }
 
 pub struct ExchangeKeys {

@@ -29,6 +29,7 @@ const BINANCE_WS_TEST_URL: &str = "wss://testnet.binance.vision/ws-api/v3";
 ///
 /// warning that ids for binance are 64-bit signed integers
 /// but program enforces u64.
+#[derive(Debug)]
 pub struct Binance {
     sink: Arc<Mutex<Sink>>,
     stream: Arc<Mutex<Stream>>,
