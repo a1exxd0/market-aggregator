@@ -41,7 +41,7 @@ impl Deribit {
         client_id: String,
         client_secret: String,
     ) -> Option<(Self, Arc<AtomicBool>)> {
-        let connection_url = if cfg!(test) {
+        let connection_url = if cfg!(test) || cfg!(feature = "test-apis") {
             info!("Using Deribit test URL");
             DERIBIT_WS_TEST_URL
         } else {

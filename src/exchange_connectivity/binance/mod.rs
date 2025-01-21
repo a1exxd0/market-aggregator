@@ -40,7 +40,7 @@ pub struct Binance {
 
 impl Binance {
     pub async fn connect() -> Option<(Self, Arc<AtomicBool>)> {
-        let connection_url = if cfg!(test) {
+        let connection_url = if cfg!(test) || cfg!(feature = "test-apis") {
             log::info!("Using Binance test URL");
             BINANCE_WS_TEST_URL
         } else {
