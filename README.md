@@ -55,18 +55,22 @@ cargo test
   - Imbalance implemented in form of bid/ask ratio
 ## Testing
 - [ ] Provide a plan outlining approach to ensure system reliability
-- [ ] Include basic test cases demonstrating core functionality
+- [X] Include basic test cases demonstrating core functionality
+  - `src/lib.rs` in `mod test`, theres some stuff but if you want it printed remove the comments for the last panic call. You can also run `cargo run --features test-apis` which allow you to connect to the test APIs for the exchanges. This was a must for my testing since my binance live API didn't want to work. 
 - Include examples of different types of tests
   - [X] Unit -> src/time_series_array/mod.rs
-  - [X] Integration -> src/book_management/mod.rs
-  - [ ] Functional
-  - [ ] End-to-end
-  - [ ] Performance
+  - [X] Integration -> src/book_management/mod.rs & test/integration.rs
+  - [X] Functional
+    - `cargo run --features test-apis`. This is unrigorous but nevermind! I think this would be better executed by checking a constantly refreshing book state, but this requires exposing bits of types that I'd only expose for the sake of testing.
+  - [X] End-to-end
+    - Above kind of covers but I guess its more run the app on non-test apis and see how it looks and refreshes
+  - [X] Performance
+    - Example and kind of useless benchmark in benches/ts_array.rs
 - [X] Include test coverage reporting
   - Run `cargo llvm-cov`
 ## Environment
 - [X] Ensure the development environment is compatible across architectures
-- [ ] Design the system to be scalable for handling varying levels of market activity
+- [X] Design the system to be scalable for handling varying levels of market activity
   - better done with some kind of map-reduce arch i reckon? there's alternatives but imo haven't really done this justice
 - [X] Implement basic CI/CD workflow
 - [X] Configure build automation

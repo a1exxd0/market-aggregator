@@ -25,6 +25,7 @@ colored = "3.0.0"
 egui = "0.30.0"
 eframe = "0.30.0"
 egui_extras = "0.30.0"
+criterion = "0.5.1"
 
 [build-dependencies]
 
@@ -33,6 +34,10 @@ egui_extras = "0.30.0"
 [[bin]]
 name = "market-aggregator"
 path = "src/main.rs"
+
+[[bench]]
+name = "ts_array"
+harness = false
 
 [profile.dev]
 opt-level = 0
