@@ -1,6 +1,6 @@
 pub mod traded_instruments;
 
-use std::fmt::Write;
+use std::{fmt::Write, time::Duration};
 use tokio::sync::Mutex;
 use traded_instruments::Instrument;
 
@@ -11,6 +11,7 @@ use std::{cmp::Ordering, collections::BTreeSet, sync::Arc};
 pub struct AggregatedOrderBook {
     instrument: Instrument,
     subscriptions: Vec<Exchange>,
+    last_msg: Arc<Mutex<Duration>>,
     bids: Arc<Mutex<BTreeSet<Bid>>>,
     asks: Arc<Mutex<BTreeSet<Ask>>>,
 }
@@ -25,6 +26,7 @@ impl AggregatedOrderBook {
         AggregatedOrderBook {
             instrument: instrument,
             subscriptions: new_subs,
+            last_msg: Arc::new(Mutex::new(Duration::from_secs(0))),
             bids: Arc::new(Mutex::new(BTreeSet::new())),
             asks: Arc::new(Mutex::new(BTreeSet::new())),
         }
@@ -41,7 +43,7 @@ impl AggregatedOrderBook {
                 Exchange::Binance(binance) => {
                     let binance = Arc::clone(binance);
 
-                    let (new_bids, new_asks, _) =
+                    let (new_bids, new_asks, time) =
                         binance.pull_bids_asks(10, self.instrument).await?;
 
                     for bid in new_bids {
@@ -51,11 +53,13 @@ impl AggregatedOrderBook {
                     for ask in new_asks {
                         asks.insert(ask);
                     }
+
+                    *self.last_msg.lock().await = time;
                 }
                 Exchange::Deribit(deribit) => {
                     let deribit = Arc::clone(deribit);
 
-                    let (new_bids, new_asks, _) =
+                    let (new_bids, new_asks, time) =
                         deribit.pull_bids_asks(10, self.instrument).await?;
 
                     for bid in new_bids {
@@ -65,6 +69,8 @@ impl AggregatedOrderBook {
                     for ask in new_asks {
                         asks.insert(ask);
                     }
+
+                    *self.last_msg.lock().await = time;
                 }
             }
         }
@@ -73,30 +79,40 @@ impl AggregatedOrderBook {
     }
 
     pub async fn pretty_print(&self) -> Result<String, Box<dyn std::error::Error>> {
+        let imbalance = self.imbalance().await;
         let bids = self.bids.lock().await;
         let asks = self.asks.lock().await;
-
+    
         let mut output = String::new();
-
         write!(output, "Instrument: {}\n\n", self.instrument)?;
-
-        write!(output, "{:<20} {:<20}\n", "Bids", "Asks")?;
-        write!(output, "{:-<40}\n", "")?;
-
+        write!(output, "Bid/Ask Imbalance: {:?}\n\n", imbalance)?;
+        write!(
+            output, 
+            "{:<40} {:<40}\n", 
+            "Bids (Exchange - Price - Qty)", 
+            "Asks (Exchange - Price - Qty)"
+        )?;
+        write!(output, "{:-<80}\n", "")?;
+    
         let max_rows = std::cmp::max(bids.len(), asks.len());
         let mut bids_iter = bids.iter();
         let mut asks_iter = asks.iter();
-
+    
         for _ in 0..max_rows {
             let bid = bids_iter
                 .next()
-                .map_or("".to_string(), |b| format!("{:?}", b));
+                .map_or("".to_string(), |b| 
+                    format!("{:#?} - {:.2} - {:.4}", b.exchange, b.price, b.quantity)
+                );
             let ask = asks_iter
                 .next()
-                .map_or("".to_string(), |a| format!("{:?}", a));
-            write!(output, "{:<20} {:<20}\n", bid, ask)?;
+                .map_or("".to_string(), |a| 
+                    format!("{:#?} - {:.2} - {:.4}", a.exchange, a.price, a.quantity)
+                );
+                
+            write!(output, "{:<40} {:<40}\n", bid, ask)?;
         }
-
+    
         Ok(output)
     }
 
@@ -113,6 +129,10 @@ impl AggregatedOrderBook {
         }
 
         bid_total_qty / ask_total_qty
+    }
+
+    pub async fn last_time(&self) -> Duration {
+        *self.last_msg.lock().await
     }
 }
 

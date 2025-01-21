@@ -95,7 +95,7 @@ impl ConnectedExchangeForBook for Deribit {
             let mut multimap = self.non_main_stream.lock().await;
             let multimap_entry = multimap.get(&req_id);
             if let Some(entry) = multimap_entry {
-                log::info!("Found msg with id {}: {}", &req_id, entry);
+                log::info!("Found depth msg with id {}: {}", &req_id, entry);
                 let msg: serde_json::Value = serde_json::from_str(&entry)
                     .map_err(|err| format!("Failed to parse message: {}", err))?;
 

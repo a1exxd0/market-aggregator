@@ -177,23 +177,27 @@ impl Deribit {
             log::info!("Processed message: {}", text);
             self.update_auth_tokens(&msg).await?;
         } else if let Some("heartbeat") = msg["method"].as_str() {
-            log::info!("Processed message: {}", text);
+            log::info!("Processed heartbeat: {}", text);
             self.heartbeat_response()
                 .await
                 .map_err(|e| format!("Failed to send heartbeat response: {}", e))?;
+        } else if let Some(8212) = msg["id"].as_u64() {
+            log::info!("Recieved Deribit heartbeat response {}", msg);
         } else if let Some(id) = msg["id"].as_u64() {
             self.non_main_stream
                 .lock()
                 .await
                 .insert(id, text.to_string());
             log::info!(
-                "Unprocessed message with valid ID from Deribit stored with id: {}",
-                id
+                "Unprocessed message with valid ID from Deribit stored with id: {}\n\n msg: {}",
+                id,
+                msg,
             );
         } else {
             log::info!(
-                "Unprocessed message with no valid ID component from Deribit: {}",
-                text
+                "Unprocessed message with no valid ID component from Deribit: {}\n\n msg: {}",
+                text,
+                msg,
             );
         }
         Ok(())
@@ -231,7 +235,7 @@ impl Deribit {
             "id": 9098,
             "method": "public/set_heartbeat",
             "params": {
-                "interval": 10,
+                "interval": 30,
             },
         });
 
