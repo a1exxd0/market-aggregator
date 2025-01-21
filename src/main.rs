@@ -10,7 +10,7 @@ use std::sync::{Arc, atomic::Ordering};
 #[tokio::main]
 async fn main() {
     market_aggregator::logging_config();
-    
+
     if cfg!(feature = "include-binance") || cfg!(feature = "test-apis") {
         main_with_binance().await;
     } else {
