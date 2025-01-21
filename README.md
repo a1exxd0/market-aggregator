@@ -19,7 +19,7 @@ DERIBIT_API_KEY=xxxxxx
 ```
 Binance key is not required as we use a public API.
 # Build and run
-Simple as:
+Simple as (READ ON TO END OF SECTION):
 ```rust
 cargo build
 cargo run
@@ -27,6 +27,20 @@ cargo run
 If you want to run tests:
 ```rust
 cargo test
+```
+Currently, we only use the Deribit API since for some reason my computer decided today (as opposed to yesterday) that the Binance API was not to respond! See below for options:
+```sh
+# If you have no connection to binance but want to see aggregation
+# The below uses test apis which seem to work with Binance.
+# Not entirely sure why the non-test link doesnt work and maybe I've
+# made a silly mistake!
+cargo run --features test-apis
+
+# Run with binance fully enabled
+cargo run --features include-binance
+
+# Running without binance and just Deribit
+cargo run
 ```
 # A checklist
 ## WebSocket Integration
