@@ -4,6 +4,7 @@ use std::fmt::{self, Debug, Display};
 pub enum Instrument {
     BtcUsdt,
     EthUsdc,
+    EthBtc,
 }
 
 impl Debug for Instrument {
@@ -17,6 +18,7 @@ impl fmt::Display for Instrument {
         match self {
             Instrument::BtcUsdt => write!(f, "BTC_USDT"),
             Instrument::EthUsdc => write!(f, "ETH_USDC"),
+            Instrument::EthBtc => write!(f, "ETH_BTC"),
         }
     }
 }
