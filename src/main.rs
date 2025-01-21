@@ -21,16 +21,16 @@ async fn main() {
         ..Default::default()
     };
 
-    let (binance, binance_keep_alive) = Exchange::connect(ExchangeType::Binance, &keys)
-        .await
-        .unwrap();
+    // let (binance, binance_keep_alive) = Exchange::connect(ExchangeType::Binance, &keys)
+    //     .await
+    //     .unwrap();
     let (deribit, deribit_keep_alive) = Exchange::connect(ExchangeType::Deribit, &keys)
         .await
         .unwrap();
 
     let exchanges = vec![
         deribit, 
-        binance,
+        //binance,
     ];
 
     if let Err(err) = eframe::run_native(

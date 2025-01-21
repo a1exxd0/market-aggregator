@@ -1,7 +1,10 @@
 mod binance;
 mod deribit;
 
+<<<<<<< HEAD
 use std::sync::atomic::AtomicBool;
+=======
+>>>>>>> 892464aa058501cf5f87c51144f1ab0d7de52433
 use std::time::Duration;
 use std::{env, sync::Arc};
 
@@ -64,6 +67,7 @@ impl Exchange {
         match self {
             Exchange::Deribit(deribit) => deribit.pull_bids_asks(depth, instrument).await,
             Exchange::Binance(binance) => binance.pull_bids_asks(depth, instrument).await,
+<<<<<<< HEAD
         }
     }
 
@@ -102,6 +106,8 @@ impl Exchange {
 
                 Some((Exchange::Deribit(deribit), keep_alive))
             }
+=======
+>>>>>>> 892464aa058501cf5f87c51144f1ab0d7de52433
         }
     }
 }
