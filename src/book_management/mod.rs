@@ -1,3 +1,4 @@
+pub mod multibook;
 pub mod traded_instruments;
 
 use std::{fmt::Write, time::Duration};
@@ -14,6 +15,12 @@ pub struct AggregatedOrderBook {
     last_msg: Arc<Mutex<Duration>>,
     bids: Arc<Mutex<BTreeSet<Bid>>>,
     asks: Arc<Mutex<BTreeSet<Ask>>>,
+}
+
+impl PartialEq for AggregatedOrderBook {
+    fn eq(&self, other: &Self) -> bool {
+        self.instrument == other.instrument
+    }
 }
 
 impl AggregatedOrderBook {
@@ -99,10 +106,10 @@ impl AggregatedOrderBook {
 
         for _ in 0..max_rows {
             let bid = bids_iter.next().map_or("".to_string(), |b| {
-                format!("{:#?} - {:.2} - {:.4}", b.exchange, b.price, b.quantity)
+                format!("{:#?} - {:.6} - {:.6}", b.exchange, b.price, b.quantity)
             });
             let ask = asks_iter.next().map_or("".to_string(), |a| {
-                format!("{:#?} - {:.2} - {:.4}", a.exchange, a.price, a.quantity)
+                format!("{:#?} - {:.6} - {:.6}", a.exchange, a.price, a.quantity)
             });
 
             write!(output, "{:<40} {:<40}\n", bid, ask)?;
