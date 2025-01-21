@@ -22,7 +22,7 @@ use super::ConnectedExchangeForBook;
 type Sink = SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>;
 type Stream = SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>;
 
-const BINANCE_WS_URL: &str = "wss://ws-api.binance.com:443/ws-api/v3";
+const BINANCE_WS_URL: &str = "wss://ws-api.binance.com:9443/ws-api/v3";
 const BINANCE_WS_TEST_URL: &str = "wss://testnet.binance.vision/ws-api/v3";
 
 /// Connect then ws manager
@@ -44,6 +44,7 @@ impl Binance {
             log::info!("Using Binance test URL");
             BINANCE_WS_TEST_URL
         } else {
+            log::info!("Using Binance standard WS URL.");
             BINANCE_WS_URL
         };
 
@@ -56,6 +57,7 @@ impl Binance {
                 None
             }
             Ok(ok) => {
+                log::info!("Connection established with Binance client");
                 let (sink, stream) = ok.0.split();
                 let keep_alive = Arc::new(AtomicBool::new(true));
 
@@ -189,8 +191,6 @@ mod test {
     use crate::exchange_connectivity::{ConnectedExchangeForBook, Instrument};
     use std::sync::Arc;
     use std::sync::atomic::AtomicBool;
-
-    use colored::Colorize;
 
     use super::Binance;
 

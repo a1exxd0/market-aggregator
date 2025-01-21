@@ -1,13 +1,16 @@
-pub mod binance;
-pub mod deribit;
+mod binance;
+mod deribit;
 
-use std::{env, sync::Arc};
+use std::sync::atomic::AtomicBool;
 use std::time::Duration;
+use std::{env, sync::Arc};
 
 use binance::Binance;
 use deribit::Deribit;
 use dotenv::dotenv;
+use futures_util::task;
 use std::error::Error;
+use tokio::task::spawn;
 
 use crate::book_management::{Ask, Bid, traded_instruments::Instrument};
 
@@ -26,7 +29,9 @@ pub trait ConnectedExchangeForBook {
         Output = Result<(Vec<Bid>, Vec<Ask>, Duration), Box<dyn Error + Send + Sync>>,
     > + Send;
 
-    fn to_instrument_name(instrument: Instrument) -> String where Self: Sized;
+    fn to_instrument_name(instrument: Instrument) -> String
+    where
+        Self: Sized;
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -35,10 +40,19 @@ pub enum ExchangeType {
     Binance,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum Exchange {
     Deribit(Arc<Deribit>),
     Binance(Arc<Binance>),
+}
+
+impl Clone for Exchange {
+    fn clone(&self) -> Self {
+        match self {
+            Exchange::Binance(binance) => Exchange::Binance(Arc::clone(&binance)),
+            Exchange::Deribit(deribit) => Exchange::Deribit(Arc::clone(&deribit)),
+        }
+    }
 }
 
 impl Exchange {
@@ -46,15 +60,48 @@ impl Exchange {
         &self,
         depth: u32,
         instrument: Instrument,
-    ) -> Result<(Vec<Bid>, Vec<Ask>, Duration), Box<dyn Error + Send + Sync>>
-    {
+    ) -> Result<(Vec<Bid>, Vec<Ask>, Duration), Box<dyn Error + Send + Sync>> {
         match self {
-            Exchange::Deribit(deribit) => {
-                deribit.pull_bids_asks(depth, instrument).await
-            },
-            Exchange::Binance(binance) => {
-                binance.pull_bids_asks(depth, instrument).await
-            },
+            Exchange::Deribit(deribit) => deribit.pull_bids_asks(depth, instrument).await,
+            Exchange::Binance(binance) => binance.pull_bids_asks(depth, instrument).await,
+        }
+    }
+
+    pub async fn connect(
+        exchange: ExchangeType,
+        keys: &ExchangeKeys,
+    ) -> Option<(Exchange, Arc<AtomicBool>)> {
+        match exchange {
+            ExchangeType::Binance => {
+                let (binance, keep_alive) = {
+                    let (binance, keep_alive) = Binance::connect().await?;
+                    (Arc::new(binance), keep_alive)
+                };
+
+                let binance_clone = Arc::clone(&binance);
+                spawn(async move {
+                    binance_clone.ws_manager().await;
+                });
+
+                Some((Exchange::Binance(binance), keep_alive))
+            }
+            ExchangeType::Deribit => {
+                let (deribit, keep_alive) = {
+                    let (deribit, keep_alive) = Deribit::connect(
+                        keys.deribit_client_id.to_string(),
+                        keys.deribit_api_key.to_string(),
+                    )
+                    .await?;
+                    (Arc::new(deribit), keep_alive)
+                };
+
+                let deribit_clone = Arc::clone(&deribit);
+                spawn(async move {
+                    deribit_clone.ws_manager().await;
+                });
+
+                Some((Exchange::Deribit(deribit), keep_alive))
+            }
         }
     }
 }
