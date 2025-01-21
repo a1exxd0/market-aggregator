@@ -82,37 +82,32 @@ impl AggregatedOrderBook {
         let imbalance = self.imbalance().await;
         let bids = self.bids.lock().await;
         let asks = self.asks.lock().await;
-    
+
         let mut output = String::new();
         write!(output, "Instrument: {}\n\n", self.instrument)?;
         write!(output, "Bid/Ask Imbalance: {:?}\n\n", imbalance)?;
         write!(
-            output, 
-            "{:<40} {:<40}\n", 
-            "Bids (Exchange - Price - Qty)", 
-            "Asks (Exchange - Price - Qty)"
+            output,
+            "{:<40} {:<40}\n",
+            "Bids (Exchange - Price - Qty)", "Asks (Exchange - Price - Qty)"
         )?;
         write!(output, "{:-<80}\n", "")?;
-    
+
         let max_rows = std::cmp::max(bids.len(), asks.len());
         let mut bids_iter = bids.iter();
         let mut asks_iter = asks.iter();
-    
+
         for _ in 0..max_rows {
-            let bid = bids_iter
-                .next()
-                .map_or("".to_string(), |b| 
-                    format!("{:#?} - {:.2} - {:.4}", b.exchange, b.price, b.quantity)
-                );
-            let ask = asks_iter
-                .next()
-                .map_or("".to_string(), |a| 
-                    format!("{:#?} - {:.2} - {:.4}", a.exchange, a.price, a.quantity)
-                );
-                
+            let bid = bids_iter.next().map_or("".to_string(), |b| {
+                format!("{:#?} - {:.2} - {:.4}", b.exchange, b.price, b.quantity)
+            });
+            let ask = asks_iter.next().map_or("".to_string(), |a| {
+                format!("{:#?} - {:.2} - {:.4}", a.exchange, a.price, a.quantity)
+            });
+
             write!(output, "{:<40} {:<40}\n", bid, ask)?;
         }
-    
+
         Ok(output)
     }
 

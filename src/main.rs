@@ -73,8 +73,6 @@ impl MyApp {
 
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        
-
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("market-aggregator");
             let curr_time = *self.curr_time.lock().unwrap();
