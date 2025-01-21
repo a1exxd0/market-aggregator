@@ -1,7 +1,6 @@
-use std::{hint::black_box, time::Duration};
-use criterion::{criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, criterion_group, criterion_main};
 use market_aggregator::time_series_array::TimeSeriesArray;
-
+use std::{hint::black_box, time::Duration};
 
 fn bench_inserts(c: &mut Criterion) {
     c.bench_function("inserts", |b| {

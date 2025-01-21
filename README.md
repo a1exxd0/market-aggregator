@@ -54,7 +54,14 @@ cargo test
 - [X] Add an additional statistic or sophisticated analytics feature like volume/imbalance between bid/ask
   - Imbalance implemented in form of bid/ask ratio
 ## Testing
-- [ ] Provide a plan outlining approach to ensure system reliability
+- [X] Provide a plan outlining approach to ensure system reliability
+  - Thorough unit testing (written by someone who is not me)
+  - Anything failable should return a result type and be handled and logged appropriately
+  - No use of Rust `unsafe`!
+  - Detailed logging in general
+  - Probably should tidy up the API and make a library out of it in a nice manner
+  - (this is on top of stuff I've done):
+    - user testing
 - [X] Include basic test cases demonstrating core functionality
   - `src/lib.rs` in `mod test`, theres some stuff but if you want it printed remove the comments for the last panic call. You can also run `cargo run --features test-apis` which allow you to connect to the test APIs for the exchanges. This was a must for my testing since my binance live API didn't want to work. 
 - Include examples of different types of tests
