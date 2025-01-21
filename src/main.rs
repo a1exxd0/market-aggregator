@@ -25,7 +25,7 @@ async fn main() {
         .await
         .unwrap();
 
-    let exchanges = Arc::new(vec![deribit, /* binance */ ]);
+    let exchanges = Arc::new(vec![deribit /* binance */]);
 
     let book_collection = vec![
         Arc::new(AggregatedOrderBook::new(Instrument::BtcUsdt, &exchanges)),

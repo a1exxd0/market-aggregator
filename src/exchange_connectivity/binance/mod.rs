@@ -17,8 +17,6 @@ use tokio_tungstenite::{
     MaybeTlsStream, WebSocketStream, connect_async, tungstenite::protocol::Message,
 };
 
-use super::ConnectedExchangeForBook;
-
 type Sink = SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>;
 type Stream = SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>;
 

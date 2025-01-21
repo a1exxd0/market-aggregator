@@ -7,8 +7,8 @@ use book_management::AggregatedOrderBook;
 use book_management::multibook::Multibook;
 use chrono::TimeZone;
 use std::collections::BTreeMap;
-use std::time::Duration;
 use std::sync::Arc;
+use std::time::Duration;
 
 use std::sync::Mutex;
 use tokio::task;
