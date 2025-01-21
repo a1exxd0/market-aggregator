@@ -42,6 +42,7 @@ cargo run --features include-binance
 # Running without binance and just Deribit
 cargo run
 ```
+Note: compiling without benchmarks enabled will drastically reduce time to compile and overall build size.
 # A checklist
 ## WebSocket Integration
 - [X] Implement proper connection management with auto-reconnection and error handling

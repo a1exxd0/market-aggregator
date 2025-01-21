@@ -4,11 +4,13 @@ use std::time::Duration;
 
 fn bench_inserts(c: &mut Criterion) {
     c.bench_function("inserts", |b| {
-        let mut arr = TimeSeriesArray::new();
+        b.iter(|| {
+            let mut arr = TimeSeriesArray::new();
 
-        for i in 0..100 {
-            let _ = arr.insert(Duration::from_millis(i), &10.0);
-        }
+            for i in 0..100 {
+                let _ = arr.insert(Duration::from_millis(i), &10.0);
+            }
+        })
     });
 }
 
