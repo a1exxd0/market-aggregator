@@ -30,6 +30,6 @@ mod test {
         }
 
         // uncomment and run cargo test if binance api doesnt work.
-        panic!("{}", aggregated.pretty_print().await.unwrap());
+        // panic!("{}", aggregated.pretty_print().await.unwrap());
     }
 }
