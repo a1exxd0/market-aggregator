@@ -181,9 +181,9 @@ impl PartialOrd for Bid {
 
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match self.price - other.price {
-            x if x < 0.0 => Some(Ordering::Less),
-            x if x == 0.0 => Some(Ordering::Equal),
-            x if x > 0.0 => Some(Ordering::Greater),
+            x if x > 0.0 => Some(Ordering::Less),
+            x if x == 0.0 => self.quantity.partial_cmp(&other.quantity),
+            x if x < 0.0 => Some(Ordering::Greater),
             _ => None,
         }
     }
@@ -191,14 +191,7 @@ impl PartialOrd for Bid {
 
 impl Ord for Bid {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.price
-            .partial_cmp(&other.price)
-            .unwrap_or(Ordering::Equal)
-            .then_with(|| {
-                self.quantity
-                    .partial_cmp(&other.quantity)
-                    .unwrap_or(Ordering::Equal)
-            })
+        self.partial_cmp(other).unwrap_or(Ordering::Equal)
     }
 }
 
@@ -265,7 +258,7 @@ impl PartialOrd for Ask {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match self.price - other.price {
             x if x < 0.0 => Some(Ordering::Less),
-            x if x == 0.0 => Some(Ordering::Equal),
+            x if x == 0.0 => self.quantity.partial_cmp(&other.quantity),
             x if x > 0.0 => Some(Ordering::Greater),
             _ => None,
         }
@@ -274,14 +267,7 @@ impl PartialOrd for Ask {
 
 impl Ord for Ask {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.price
-            .partial_cmp(&other.price)
-            .unwrap_or(Ordering::Equal)
-            .then_with(|| {
-                self.quantity
-                    .partial_cmp(&other.quantity)
-                    .unwrap_or(Ordering::Equal)
-            })
+        self.partial_cmp(other).unwrap_or(Ordering::Equal)
     }
 }
 
