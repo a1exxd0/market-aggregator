@@ -42,7 +42,11 @@ cargo run --features include-binance
 # Running without binance and just Deribit
 cargo run
 ```
-Note: compiling without benchmarks enabled will drastically reduce time to compile and overall build size.
+# Notes on weaknesses
+- Compiling without benchmarks enabled will drastically reduce time to compile and overall build size.
+- I should've used streams and subscriptions instead of directly querying for the whole book on every refresh. This isn't really a scalable solution if I want to monitor a large number of spot market books.
+- Testing is kind of mediocre
+- I also can't really tell what `temporary storage optimised for time-series and tick-level data` is for, unless this means how are you storing orders. I use an ordered set for this. I implemented a `TimeSeriesArray` for you to have a look at with a bit of reference info but it's not actually used anywhere.
 # A checklist
 ## WebSocket Integration
 - [X] Implement proper connection management with auto-reconnection and error handling
@@ -53,7 +57,7 @@ Note: compiling without benchmarks enabled will drastically reduce time to compi
 - [X] Handle Deribit WebSocket
 - [X] Handle Binance WebSocket
   - Somewhat lazy to not implement the streams version of this :( sorry
-- [ ] Process real-time updates while maintaining an accurate order-book state
+- [X] Process real-time updates while maintaining an accurate order-book state
 - [X] Let it easily accomodate more exchanges later on
 - [X] Support for additional trading pairs beyond BTC-USDT
 ## Storage Solution
