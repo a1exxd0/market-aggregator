@@ -1,8 +1,8 @@
 use book_management::traded_instruments::Instrument;
 use market_aggregator::{
-    MyApp,
     book_management::{self, AggregatedOrderBook},
     exchange_connectivity::{Exchange, ExchangeKeys, ExchangeType},
+    gui::MyApp,
 };
 
 use std::sync::{Arc, atomic::Ordering};

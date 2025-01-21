@@ -1,6 +1,13 @@
-use std::{sync::{atomic::Ordering, Arc}, time::Duration};
+use std::{
+    sync::{Arc, atomic::Ordering},
+    time::Duration,
+};
 
-use market_aggregator::{book_management::{traded_instruments::Instrument, AggregatedOrderBook}, exchange_connectivity::{Exchange, ExchangeKeys, ExchangeType}, MyApp};
+use market_aggregator::{
+    book_management::{AggregatedOrderBook, traded_instruments::Instrument},
+    exchange_connectivity::{Exchange, ExchangeKeys, ExchangeType},
+    gui::MyApp,
+};
 
 // Integration tests use the non-test version of the main module, binance sucks!
 #[tokio::test]
@@ -18,7 +25,7 @@ async fn create_book_aggregation_update() {
     //     .unwrap();
 
     let exchanges = Arc::new(vec![deribit]);
-    
+
     let book_collection = vec![
         Arc::new(AggregatedOrderBook::new(Instrument::BtcUsdt, &exchanges)),
         Arc::new(AggregatedOrderBook::new(Instrument::EthUsdc, &exchanges)),
@@ -28,7 +35,7 @@ async fn create_book_aggregation_update() {
     println!("before");
     let _my_app = MyApp::new(book_collection.into_iter());
     println!("after");
-    
+
     // it refreshes automatically in this time
     tokio::time::sleep(Duration::from_millis(100)).await;
 
