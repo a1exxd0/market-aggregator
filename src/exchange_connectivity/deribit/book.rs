@@ -133,6 +133,7 @@ impl ConnectedExchangeForBook for Deribit {
         match instrument {
             Instrument::BtcUsdt => "BTC_USDT".to_string(),
             Instrument::EthUsdc => "ETH_USDC".to_string(),
+            Instrument::EthBtc => "ETH_BTC".to_string(),
         }
     }
 }

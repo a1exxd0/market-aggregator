@@ -58,6 +58,7 @@ impl ConnectedExchangeForBook for Binance {
         match instrument {
             Instrument::BtcUsdt => "BTCUSDT".to_string(),
             Instrument::EthUsdc => "ETHUSDC".to_string(),
+            Instrument::EthBtc => "ETCBTC".to_string(),
         }
     }
 
